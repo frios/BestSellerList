@@ -23,19 +23,13 @@ struct ListsView: View {
                     ContentUnavailableView("No lists yet", systemImage: "list.bullet", description: Text("NYT Bestseller lists not downloaded yet"))
                 } else {
                     ForEach(nytOverviewResponses.last!.results.lists, id: \.listNameEncoded) { list in
-                        NavigationLink(value: list) {
                             HStack {
                                 Text("\(list.displayName)")/*.font(Font.custom("Georgia", size: 17))*/
                             }
-                        }
                     }
                 }
              }
-            .navigationDestination(for: NYTList.self) { list in
-                ListView(list: list)
-                    .font(Font.custom("Georgia", size: 17))
-            }
-            .navigationBarTitle("Lists",/* displayMode: .large*/)
+            .navigationBarTitle("Lists")
         }
 
         .task {

@@ -8,6 +8,9 @@
 import SwiftData
 import SwiftUI
 
+let NYT_API_KEY = "OTGpCyr0b3MRyHPHcyGb7EawVAn0GMUl"
+let appID = "1555167310"
+
 @main
 struct Best_Seller_ListApp: App {
     
