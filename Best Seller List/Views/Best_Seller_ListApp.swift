@@ -8,8 +8,6 @@
 import SwiftData
 import SwiftUI
 
-let NYT_API_KEY = "OTGpCyr0b3MRyHPHcyGb7EawVAn0GMUl"
-let appID = "1555167310"
 
 @main
 struct Best_Seller_ListApp: App {
@@ -20,7 +18,26 @@ struct Best_Seller_ListApp: App {
                 ContentView()
             }
         }
-        .modelContainer(for: NYTOverviewResponse.self)
+        .modelContainer(for: NYTOverviewResponse.self) {result in
+            do {
+                let container = try result.get()
+                let descriptor = FetchDescriptor<NYTOverviewResponse>()
+                let overviewResponse = try container.mainContext.fetchCount(descriptor)
+                guard overviewResponse == 0 else { return }
+                
+                // Load and decode the JSON.
+                guard let url = Bundle.main.url(forResource: "BestSellers", withExtension: "json") else {
+                    fatalError("Failed to find Bestsellers.json")
+                }
+                let data = try Data(contentsOf: url)
+                let response = try JSONDecoder().decode(NYTOverviewResponse.self, from: data)
+
+                container.mainContext.insert(response)
+            } catch {
+                print("Unable to decode data. \(error.localizedDescription)")
+            }
+        }
     }
-    
 }
+    
+

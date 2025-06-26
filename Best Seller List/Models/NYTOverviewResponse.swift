@@ -8,7 +8,7 @@
 import SwiftData
 
 @Model
-class NYTOverviewResponse: Decodable {
+class NYTOverviewResponse: Codable {
     var status : String
     var copyright : String
     var numResults : Int
@@ -35,43 +35,59 @@ class NYTOverviewResponse: Decodable {
         self.numResults = numResults
         self.results = results
     }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(status, forKey: .status)
+        try container.encode(copyright, forKey: .copyright)
+        try container.encode(numResults, forKey: .numResults)
+        try container.encode(results, forKey: .results)
+    }
 }
 
 @Model
-class NYTOverviewResult: Decodable {
-    var publishedDate : String
+class NYTOverviewResult: Codable {
     var previousPublishedDate : String
+    var publishedDate : String
     var nextPublishedDate : String
     var lists : [NYTList]
     
     enum CodingKeys : CodingKey {
-        case publishedDate
         case previousPublishedDate
+        case publishedDate
         case nextPublishedDate
         case lists
     }
     
     required init(from decoder : Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        publishedDate = try container.decodeIfPresent (String.self, forKey: .publishedDate) ?? ""
         previousPublishedDate = try container.decodeIfPresent (String.self, forKey: .previousPublishedDate) ?? ""
+        publishedDate = try container.decodeIfPresent (String.self, forKey: .publishedDate) ?? ""
         nextPublishedDate = try container.decodeIfPresent (String.self, forKey: .nextPublishedDate) ?? ""
         lists = try container.decodeIfPresent([NYTList].self, forKey: .lists) ?? [NYTList]()
     }
 
-    init(publishedDate: String = "", previousPublishedDate: String = "", nextPublishedDate: String = "", lists: [NYTList] = [NYTList]()) {
-        self.publishedDate = publishedDate
+    init(previousPublishedDate: String = "", publishedDate: String = "", nextPublishedDate: String = "", publishedDateDescription : String = "", bestsellersDate : String = "", lists: [NYTList] = [NYTList]()) {
         self.previousPublishedDate = previousPublishedDate
+        self.publishedDate = publishedDate
         self.nextPublishedDate = nextPublishedDate
         self.lists = lists
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(previousPublishedDate, forKey: .previousPublishedDate)
+        try container.encode(publishedDate, forKey: .publishedDate)
+        try container.encode(nextPublishedDate, forKey: .nextPublishedDate)
+        try container.encode(lists, forKey: .lists)
     }
 }
 
 @Model
-class NYTList: Decodable {
-    var displayName : String = ""
-    var listNameEncoded : String = ""
-    var updated : String = ""
+class NYTList: Codable {
+    var displayName : String
+    var listNameEncoded : String
+    var updated : String
     var books : [NYTBook]
 
     enum CodingKeys : CodingKey {
@@ -84,21 +100,29 @@ class NYTList: Decodable {
     required init(from decoder : Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         displayName = try container.decodeIfPresent (String.self, forKey: .displayName) ?? ""
-        listNameEncoded = try container.decode (String.self, forKey: .listNameEncoded)
+        listNameEncoded = try container.decodeIfPresent (String.self, forKey: .listNameEncoded) ?? ""
         updated = try container.decodeIfPresent (String.self, forKey: .updated) ?? ""
         books = try container.decodeIfPresent ([NYTBook].self, forKey: .books) ?? [NYTBook]()
     }
 
-    init(displayName: String = "", listNameEncoded: String = "", updated: String = "", books: [NYTBook] = [NYTBook]()) {
+    init(displayName: String = "", listName: String = "", listNameEncoded: String = "", normalListEndsAt: Int = 0, updated: String = "", listId: Int = 0, uri: String = "", books: [NYTBook] = [NYTBook]()) {
         self.displayName = displayName
         self.listNameEncoded = listNameEncoded
         self.updated = updated
         self.books = books
     }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(displayName, forKey: .displayName)
+        try container.encode(listNameEncoded, forKey: .listNameEncoded)
+        try container.encode(updated, forKey: .updated)
+        try container.encode(books, forKey: .books)
+    }
 }
 
 @Model
-class NYTBook: Decodable {
+class NYTBook: Codable {
 
     var rank : Int
     var rankLastWeek : Int
@@ -175,12 +199,23 @@ class NYTBook: Decodable {
         self.sundayReviewLink = sundayReviewLink
     }
     
-    static var sampleData = [NYTBook(rank: 1, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 2, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 3, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 4, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 5, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 6, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 7, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 8, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 9, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 10, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 11, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 12, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 13, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 14, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com"), NYTBook(rank: 15, rankLastWeek: 2, weeksOnList: 2, asterisk: 1, dagger: 1, primaryIsbn13: "1111111111111", publisher: "River's Mind", description: "As dust storms roll during the Great Depression, Elsa must choose between saving the family and farm or heading West.", title: "This is the book's long title", author: "Kristin Hannah", contributor: "Tani E. Perez", bookImage: "DefaultBookImage", amazonProductUrl: "", ageGroup: "All ages", bookReviewLink: "https://labs.viciouscircle.com", sundayReviewLink: "https://labs.viciouscircle.com")]
-
-    
-}
-
-class NYTBuyLinks: Codable {
-    var name = ""
-    var url = ""
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(rank, forKey: .rank)
+        try container.encode(rankLastWeek, forKey: .rankLastWeek)
+        try container.encode(weeksOnList, forKey: .weeksOnList)
+        try container.encode(asterisk, forKey: .asterisk)
+        try container.encode(dagger, forKey: .dagger)
+        try container.encode(primaryIsbn13, forKey: .primaryIsbn13)
+        try container.encode(publisher, forKey: .publisher)
+        try container.encode(nytDescription, forKey: .description)
+        try container.encode(title, forKey: .title)
+        try container.encode(author, forKey: .author)
+        try container.encode(contributor, forKey: .contributor)
+        try container.encode(bookImage, forKey: .bookImage)
+        try container.encode(amazonProductUrl, forKey: .amazonProductUrl)
+        try container.encode(ageGroup, forKey: .ageGroup)
+        try container.encode(bookReviewLink, forKey: .bookReviewLink)
+        try container.encode(sundayReviewLink, forKey: .sundayReviewLink)
+    }
 }
