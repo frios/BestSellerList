@@ -30,23 +30,23 @@ struct ContentView: View {
             .navigationBarTitle("Lists")
         }
 
-        .task {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            let dateString = formatter.string(from: Date.now)
-            
-            if dateString >= nytOverviewResponses.first?.results.publishedDate ?? dateString {
-                await getLists()
-            }
-            
-        }
+//        .task {
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "yyyy-MM-dd"
+//            let dateString = formatter.string(from: Date.now)
+//            
+//            if dateString >= nytOverviewResponses.first?.results.publishedDate ?? dateString {
+//                await getLists()
+//            }
+//            
+//        }
     }
     
     
     //MARK: - Functions
     
     func getLists() async {
-        guard let url = URL(string: "https://api.nytimes.com/svc/books/v3/lists/overview.json?api-key=OTGpCyr0b3MRyHPHcyGb7EawVAn0GMUl") else {
+        guard let url = URL(string: "https://api.nytimes.com/svc/books/v3/lists/overview.json?api-key=") else {
             print("Invalid URL")
             return
         }
