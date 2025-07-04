@@ -7,12 +7,13 @@
 
 import SwiftData
 
+
 @Model
 class NYTOverviewResponse: Codable {
     var status : String
     var copyright : String
     var numResults : Int
-    var results : NYTOverviewResult
+    var results: NYTOverviewResult
     
     enum CodingKeys: CodingKey {
         case status
@@ -50,27 +51,45 @@ class NYTOverviewResult: Codable {
     var previousPublishedDate : String
     var publishedDate : String
     var nextPublishedDate : String
-    var lists : [NYTList]
-    
-    enum CodingKeys : CodingKey {
+    var publishedDateDescription : String
+    var bestsellersDate: String
+    var lists: [NYTList]
+    var monthlyURI: String
+    var weeklyURI: String
+
+    enum CodingKeys: CodingKey {
         case previousPublishedDate
         case publishedDate
         case nextPublishedDate
+        case publishedDateDescription
+        case bestsellersDate
         case lists
+        case monthlyURI
+        case weeklyURI
     }
-    
+
     required init(from decoder : Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         previousPublishedDate = try container.decodeIfPresent (String.self, forKey: .previousPublishedDate) ?? ""
         publishedDate = try container.decodeIfPresent (String.self, forKey: .publishedDate) ?? ""
         nextPublishedDate = try container.decodeIfPresent (String.self, forKey: .nextPublishedDate) ?? ""
+        
+        publishedDateDescription = try container.decodeIfPresent (String.self, forKey: .publishedDateDescription) ?? ""
+        bestsellersDate = try container.decodeIfPresent (String.self, forKey: .bestsellersDate) ?? ""
+        monthlyURI = try container.decodeIfPresent (String.self, forKey: .monthlyURI) ?? ""
+        weeklyURI = try container.decodeIfPresent (String.self, forKey: .weeklyURI) ?? ""
+
         lists = try container.decodeIfPresent([NYTList].self, forKey: .lists) ?? [NYTList]()
     }
 
-    init(previousPublishedDate: String = "", publishedDate: String = "", nextPublishedDate: String = "", publishedDateDescription : String = "", bestsellersDate : String = "", lists: [NYTList] = [NYTList]()) {
+    init(previousPublishedDate: String = "", publishedDate: String = "", nextPublishedDate: String = "", publishedDateDescription : String = "", bestsellersDate : String = "", monthlyURI: String = "", weeklyURI: String = "", lists: [NYTList] = [NYTList]()) {
         self.previousPublishedDate = previousPublishedDate
         self.publishedDate = publishedDate
         self.nextPublishedDate = nextPublishedDate
+        self.publishedDateDescription = publishedDateDescription
+        self.bestsellersDate = bestsellersDate
+        self.monthlyURI = monthlyURI
+        self.weeklyURI = weeklyURI
         self.lists = lists
     }
     
@@ -79,46 +98,66 @@ class NYTOverviewResult: Codable {
         try container.encode(previousPublishedDate, forKey: .previousPublishedDate)
         try container.encode(publishedDate, forKey: .publishedDate)
         try container.encode(nextPublishedDate, forKey: .nextPublishedDate)
+        try container.encode(publishedDateDescription, forKey: .publishedDateDescription)
+        try container.encode(bestsellersDate, forKey: .bestsellersDate)
+        try container.encode(monthlyURI, forKey: .monthlyURI)
+        try container.encode(weeklyURI, forKey: .weeklyURI)
         try container.encode(lists, forKey: .lists)
     }
 }
 
 @Model
 class NYTList: Codable {
-    var displayName : String
-    var listNameEncoded : String
-    var updated : String
-    var books : [NYTBook]
+    var displayName: String
+    var listName: String
+    var listNameEncoded: String
+    var lastUpdated : String  // <---- here, do not use "updated"
+    var listId: Int
+    var uri: String
+    var books: [NYTBook]
 
-    enum CodingKeys : CodingKey {
+    enum CodingKeys: String, CodingKey {
         case displayName
-        case listNameEncoded
-        case updated
+        case listName
+        case listNameEncoded 
+        case lastUpdated = "updated"  // <---- here
+        case listId
+        case uri
         case books
     }
     
     required init(from decoder : Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         displayName = try container.decodeIfPresent (String.self, forKey: .displayName) ?? ""
+        listName = try container.decodeIfPresent (String.self, forKey: .listName) ?? ""
         listNameEncoded = try container.decodeIfPresent (String.self, forKey: .listNameEncoded) ?? ""
-        updated = try container.decodeIfPresent (String.self, forKey: .updated) ?? ""
+        lastUpdated = try container.decodeIfPresent (String.self, forKey: .lastUpdated) ?? ""  // <---- here
+        listId = try container.decodeIfPresent (Int.self, forKey: .listId) ?? 0
+        uri = try container.decodeIfPresent (String.self, forKey: .uri) ?? ""
         books = try container.decodeIfPresent ([NYTBook].self, forKey: .books) ?? [NYTBook]()
     }
 
-    init(displayName: String = "", listName: String = "", listNameEncoded: String = "", normalListEndsAt: Int = 0, updated: String = "", listId: Int = 0, uri: String = "", books: [NYTBook] = [NYTBook]()) {
+    init(displayName: String = "", listName: String = "", listNameEncoded: String = "", lastUpdated: String = "", listId: Int = 0, uri: String = "", books: [NYTBook] = [NYTBook]()) {
         self.displayName = displayName
+        self.listName = listName
         self.listNameEncoded = listNameEncoded
-        self.updated = updated
+        self.lastUpdated = lastUpdated  // <---- here
+        self.listId = listId
+        self.uri = uri
         self.books = books
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(displayName, forKey: .displayName)
+        try container.encode(listName, forKey: .listName)
         try container.encode(listNameEncoded, forKey: .listNameEncoded)
-        try container.encode(updated, forKey: .updated)
+        try container.encode(lastUpdated, forKey: .lastUpdated)  // <---- here
+        try container.encode(listId, forKey: .listId)
+        try container.encode(uri, forKey: .uri)
         try container.encode(books, forKey: .books)
     }
+    
 }
 
 @Model
@@ -140,7 +179,7 @@ class NYTBook: Codable {
     var ageGroup : String
     var bookReviewLink : String
     var sundayReviewLink : String
-
+    
     enum CodingKeys: CodingKey {
         case rank
         case rankLastWeek
@@ -159,7 +198,7 @@ class NYTBook: Codable {
         case bookReviewLink
         case sundayReviewLink
     }
-    
+
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         rank = try container.decodeIfPresent (Int.self, forKey: .rank) ?? 0

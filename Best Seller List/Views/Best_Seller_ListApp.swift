@@ -18,23 +18,27 @@ struct Best_Seller_ListApp: App {
                 ContentView()
             }
         }
-        .modelContainer(for: NYTOverviewResponse.self) {result in
+        .modelContainer(for: NYTOverviewResponse.self) { result in
             do {
                 let container = try result.get()
                 let descriptor = FetchDescriptor<NYTOverviewResponse>()
                 let overviewResponse = try container.mainContext.fetchCount(descriptor)
                 guard overviewResponse == 0 else { return }
                 
-                // Load and decode the JSON.
+                // load the JSON.
                 guard let url = Bundle.main.url(forResource: "BestSellers", withExtension: "json") else {
                     fatalError("Failed to find Bestsellers.json")
                 }
                 let data = try Data(contentsOf: url)
-                let response = try JSONDecoder().decode(NYTOverviewResponse.self, from: data)
-
+                
+                // decode the JSON.
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let response = try decoder.decode(NYTOverviewResponse.self, from: data)
+                
                 container.mainContext.insert(response)
             } catch {
-                print("Unable to decode data. \(error.localizedDescription)")
+                print("----> Unable to decode data. \(error)")
             }
         }
     }
