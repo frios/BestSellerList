@@ -24,25 +24,18 @@ struct ContentView: View {
                     ContentUnavailableView("No lists yet", systemImage: "list.bullet", description: Text("NYT Bestseller lists not downloaded yet"))
                 } else {
                     ForEach(nytOverviewResponses.first!.results.lists) { list in
-                        if list.displayName.isEmpty && list.listNameEncoded.isEmpty {
-                            HStack {
-                                Text("no displayName")
-                                Spacer()
-                                Text("no listNameEncoded")
-                            }.foregroundStyle(.red)
-                        } else {
-                            HStack {
-                                Text("\(list.displayName)")
-                                Spacer()
-                                Text("\(list.listNameEncoded)")
-                            }.foregroundStyle(.blue)
+                        HStack {
+                            Text("\(list.displayName)")
+                            Spacer()
+                            Text("\(list.listNameEncoded)")
+                            Spacer()
+                            Text("\(list.lastUpdated)")
                         }
                     }
                 }
              }
             .navigationBarTitle("Lists")
         }
-
 //        .task {
 //            let formatter = DateFormatter()
 //            formatter.dateFormat = "yyyy-MM-dd"
